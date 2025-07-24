@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CTIA 威脅情報分析師練習測驗</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-item {
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .question-container {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            line-height: 1.6;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .options-container {
+            display: grid;
+            gap: 15px;
+        }
+
+        .option {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .option.correct {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .option.incorrect {
+            border-color: #dc3545;
+            background: #f8d7da;
+        }
+
+        .option-label {
+            font-weight: bold;
+            color: #667eea;
+            margin-right: 10px;
+        }
+
+        .controls {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .feedback {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .feedback.correct {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .feedback.incorrect {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .quiz-complete {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .quiz-complete h2 {
+            color: #333;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        .final-score {
+            font-size: 3em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+
+        .performance-message {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .quiz-container {
+                padding: 20px;
+            }
+
+            .header h1 {
+                font-size: 2em;
+            }
+
+            .stats {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .controls {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="header">
+            <h1>🛡️ CTIA 威脅情報分析師練習測驗</h1>
+            <p>測試您的威脅情報分析知識</p>
+        </div>
+
+        <div class="stats">
+            <div class="stat-item">
+                <div class="stat-number" id="current-question">1</div>
+                <div class="stat-label">當前題目</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="total-questions">50</div>
+                <div class="stat-label">總題數</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="correct-count">0</div>
+                <div class="stat-label">答對數</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" id="accuracy">0%</div>
+                <div class="stat-label">正確率</div>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill"></div>
+        </div>
+
+        <div id="quiz-content">
+            <div class="question-container">
+                <div class="question-number" id="question-number">Question 1</div>
+                <div class="question-text" id="question-text"></div>
+                <div class="options-container" id="options-container"></div>
+            </div>
+
+            <div class="feedback" id="feedback" style="display: none;"></div>
+
+            <div class="controls">
+                <button class="btn btn-primary" id="submit-btn">提交答案</button>
+                <button class="btn btn-secondary" id="next-btn" style="display: none;">下一題</button>
+                <button class="btn btn-secondary" id="restart-btn" style="display: none;">重新開始</button>
+            </div>
+        </div>
+
+        <div id="quiz-complete" class="quiz-complete" style="display: none;">
+            <h2>🎉 測驗完成！</h2>
+            <div class="final-score" id="final-score"></div>
+            <div class="performance-message" id="performance-message"></div>
+            <button class="btn btn-primary" id="restart-final-btn">重新開始測驗</button>
+        </div>
+    </div>
+
+    <script>
+        // 題目數據
+        const questions = [
+            {
+                question: "CalSoft is a large-scale organization that wants to establish a certn within the organization. As various departments in the organization plan to use different trust models for different departments. In addition, the intelligence to all connected members and organizations. Which of the following organizational trust models should be used by CalSoft?",
+                options: ["Mandated trust", "Mediated trust", "Hybrid trust", "Validated trust"],
+                correct: 2
+            },
+            {
+                question: "An organization, namely Highlander, Inc., decided to integrate threat processes for rapid detection and recovery from various security incidents. In which of the following phases of the incident response management does operational and tactical threat intelligence provide context to other mechanisms?",
+                options: ["Phase 1: Preplanning", "Phase 2: Event", "Phase 3: Incident", "Phase 4: Breach"],
+                correct: 3
+            },
+            {
+                question: "Steve is working as an analyst for Highlanders Co. While performing, he included a list of all activities required to complete endpoints such as milestones to acquire information about the period of the activities obtained. Which of the following data analysis methods was used by Steve?",
+                options: ["Timeline analysis", "Critical path analysis", "Analogy analysis", "Cone of plausibility"],
+                correct: 0
+            },
+            {
+                question: "A threat analyst working in XYZ Company was asked to perform threat information collection. During this phase, he used a social engineering technique where he gathered sensitive information by impersonating an authorized person, searching important documents on desks, and rummaging bins. Which of the following social engineering techniques was used by the analyst for information?",
+                options: ["Dumpster diving", "Piggybacking", "Impersonation", "Shoulder surfing"],
+                correct: 2
+            },
+            {
+                question: "Jamie, an analyst, was asked to perform a statistical data analysis process. While performing the analysis, he used conditional probability methods to gain insights for response actions. What stage of the statistical data analysis is Jamie currently in?",
+                options: ["Data validation", "Data classification", "Data preparation", "Data correlation"],
+                correct: 3
+            },
+            {
+                question: "Mario is working as an analyst in an XYZ organization in the United States, preparing a threat landscape report to provide in-depth awareness and greater insight into threats the organization is facing. Which of the following details should she include to prepare a threat report?",
+                options: ["A summary of threat actors most likely targeting the organization along with intentions and TTPs", "History of an attack and location where it was performed", "Attribution of an attack to a specific threat actor or group", "Attacker's motivation and intention behind the attack"],
+                correct: 0
+            },
+            {
+                question: "Bob is a threat intelligence analyst in Global Technologies Inc. He identified that the organization is vulnerable to various application threats that can be exploited. Which of the following are the possible application threats that have been identified?",
+                options: ["Footprinting and spoofing", "Man-in-the-middle attack and physical security attack", "DNS and ARP poisoning", "SQL injection poisoning"],
+                correct: 2
+            },
+            {
+                question: "You are a Security Operations Center (SOC) analyst responsible for monitoring and protecting the organization's network. During routine activities, you identity a potential vulnerability that could expose systems to exploitation. In what specific aspects of cybersecurity would you actively engage in addressing and mitigating this vulnerability?",
+                options: ["Threat intelligence analysis", "Security awareness training", "Incident response", "Vulnerability management"],
+                correct: 3
+            },
+            {
+                question: "H&P, Inc. is a small-scale organization that has decided to outsource the network security due to a lack of resources in the organization. They are looking for options where they can integrate threat intelligence into their existing network defense solutions. Which of the following is the most cost-effective method the organization can employ?",
+                options: ["Recruit data management solution provider", "Look for an individual within the organization", "Recruit the right talent", "Recruit managed security service providers (MSSP)"],
+                correct: 3
+            },
+            {
+                question: "A team of threat intelligence analysts is performing threat analysis on malware, and each of them comes up with their own theory and evidence to support their theory on a given malware. To identify the most consistent theory out of all the theories, which of the following methods must the threat intelligence manager use?",
+                options: ["Automated technical analysis", "Analysis of competing hypotheses (ACH)", "Threat modeling", "Application decomposition and analysis (ADA)"],
+                correct: 1
+            },
+            {
+                question: "An analyst wants to disseminate the information effectively so that the consumers can act on the intelligence. Which of the following criteria must an analyst consider in order to make the intelligence consise, accurate, and easily understandable, and must consist of a right balance between tables, graphlics, and multimedia?",
+                options: ["The right order", "The right content", "The right time", "The right presentation"],
+                correct: 3
+            },
+            {
+                question: "John, a professional hacker, is trying to perform an APT attack on the target organization. He gains access to a single system of a target organization and tries to obtain administrative login credentials to gain further access to the systems in the network using various techniques. What phase of the advanced persistent threat lifecycle is John currently in?",
+                options: ["Initial intrusion", "Search and exfiltration", "Expansion", "Persistence"],
+                correct: 2
+            },
+            {
+                question: "Moses, a threat intelligence analyst at InfoTech Inc., wants to find crucial information about threats the organization is facing by using advanced Google search operators. He wants to identify if any fake websites are hosted that are similar to the organization's URL. Which of the following Google search queries should Moses use?",
+                options: ["related: www.infotech.org", "cache: www.infotech.org", "info: www.infotech.org", "link: www.infotech.org"],
+                correct: 0
+            },
+            {
+                question: "Karry, a threat analyst at an XYZ organization, is performing threat intelligence analysis. During the collection phase, he used a data collection method that involves no participants and relies on the analysis and observation of activities and processes going on within the local boundaries of the organization. Identify the type of data collection method used by Karry.",
+                options: ["Active data collection", "Raw data collection", "Exploited data collection", "Passive data collection"],
+                correct: 3
+            },
+            {
+                question: "Michael, a threat analyst at an organization named Tech Top, was asked to conduct a cyber threat analysis. After obtaining information regarding threats, he started analyzing the information to understand the nature of the threats. What stage of cyber-threat intelligence is Michael currently in?",
+                options: ["Unknown unknowns", "Known unknowns", "Unknowns unknown", "Known knowns"],
+                correct: 1
+            },
+            {
+                question: "Philip, a protessional hacker, is planning to attack an organization. In order to collect information, he maintains a personal or other relationship with the target person. Which of the following intelligence sources is used by Philip to collect information about the organization?",
+                options: ["SOCMINT", "FIU", "MASINT", "CHIS"],
+                correct: 3
+            },
+            {
+                question: "As the CEO of a multinational corporation, you focus on making decisions that align with the long-term goals and overall business strategies. What type of threat intelligence would be most relevant for guiding your decisions to enhance a company's resilience against emerging cyber threats?",
+                options: ["Operational threat intelligence", "Tactical threat intelligence", "Strategic threat intelligence", "Technical threat intelligence"],
+                correct: 2
+            },
+            {
+                question: "In which of the following phases of the threat intelligence lifecycle is raw data converted into information by highly trained professionals using sophisticated technology and tools?",
+                options: ["Planning and direction", "Processing and exploitation", "Analysis and production", "Data collection"],
+                correct: 1
+            },
+            {
+                question: "In which of the following phases of the threat intelligence lifecycle is information analyzed and transformed into intelligence products?",
+                options: ["Planning and direction", "Processing and exploitation", "Analysis and production", "Data collection"],
+                correct: 2
+            },
+            {
+                question: "James, a senior threat intelligence officer, was tasked with assessing the success and effectiveness of the intelligence program established by the organization. As part of the assessment, James evaluated the costs and benefits of the intelligence program, determined it any improvements were required in the program, and identified past learnings that can be applied to the future program. Identify the activity performed by James in the above scenario.",
+                options: ["Determine the costs and benefits associated with the program", "Report findings and recommendations", "Determine the fulfillment of stakeholders", "Conduct a gap analysis"],
+                correct: 3
+            },
+            {
+                question: "Marie, a threat analyst at an organization named TechSavvy, was asked to perform operational threat intelligence analysis to get contextual information about security events and incidents. Which of the following sources does Marie need to use to perform operational threat intelligence?",
+                options: ["Malware indicators, network indicators, e-mail indicators", "Attack group reports, attack campaign reports, incident reports, malware samples", "Activity-related attacks, social media sources, chat room conversations", "OSINT, security industry white papers, human contacts"],
+                correct: 1
+            },
+            {
+                question: "Marry wants to follow an iterative and incremental approach to prioritize requirements in protecting important assets of an organization against attacks. She wants to set the requirements based on priority, where the most important requirement must be met first, for a greater chance of success. Which of the following methods should Marry use to prioritize the requirements?",
+                options: ["Fusion analysis", "Data sampling", "MOSCOW", "Data visualization"],
+                correct: 2
+            },
+            {
+                question: "While monitoring network activities, an unusual surge in outbound traffic was noticed, and security incident was suspected. In the context of incident responses, what is the initial stage at which you recognize and confirm the presence of an incident?",
+                options: ["Identification", "Recovery", "Containment", "Eradication"],
+                correct: 0
+            },
+            {
+                question: "While analyzing a series of security incidents, you notice a pattern of attacks originating from specific geographical locations. To gain deeper insight into the spatial aspects of these threats, which method would you employ to understand the geographic origin and distribution of the attacks?",
+                options: ["Spatial context", "Temporal context", "Policy context", "Historical context"],
+                correct: 0
+            },
+            {
+                question: "Jacob, a professional hacker, created an exact replica of an online shopping website. He downloaded the contents of the original website onto the local system that enables him to create a dummy site for performing social engineering attacks. Which of the following techniques is used by Jacob in cloning the website?",
+                options: ["Data sampling", "Tailgating", "Social engineering", "Website mirroring"],
+                correct: 3
+            },
+            {
+                question: "In which of the following levels of the threat hunting maturity model (HMM) does an organization use threat intelligence to search for anomalies in the network, follow the latest threat reports gathered from closed sources, and use open-source tools for analysis?",
+                options: ["Level 1: Minimal", "Level 3: Innovative", "Level 2: Procedural", "Level 4: Leading"],
+                correct: 2
+            },
+            {
+                question: "Steve works as an analyst in a UK-based firm. He was asked to perform network monitoring to gather evidence of compromise. During the network monitoring, he came to know that there are connections from different locations in a short time span. Moreover, he also observed certain irregular activities from locations where the organization does not have business relations. This resembles somebody trying to exfiltrate confidential information. Which of the following key indicators of compromise does this scenario present?",
+                options: ["Unusual outbound network traffic", "Unusual activity through privileged user account", "Unexpected patching of systems", "Geographical anomalies"],
+                correct: 3
+            },
+            {
+                question: "Sean works as a threat intelligence analyst. He is assigned a project for information gathering within the network to find a potential threat. He started analysis and was trying to find out the company structure, looking for any information about the different departments and business units. He was unable to find much information. What should Sean do to get the information he needs?",
+                options: ["Sean should use website mirroring tools such as HT Track Website Copier for internal URLS", "Sean should use WayBackMachine in Archive.org to find the company's history", "Sean should use e-mail tracking tools such as eMailTracker Pro to find the company's email addresses", "Sean should use online services such as netcraft.com to find the company's network infrastructure"],
+                correct: 1
+            },
+            {
+                question: "Kira works as a security analyst in an organization. She was asked to define and set up the requirements for collecting threat intelligence information. The requirements should focus on what must be done to fulfill production intelligence. Which of the following categories of threat intelligence requirements should Kira focus on?",
+                options: ["Production requirements", "Intelligence requirements", "Business requirements", "Collection requirements"],
+                correct: 1
+            },
+            {
+                question: "To extract useful intelligence from the gathered bulk data and to improve the efficiency of processing data, Sam, a threat analyst, follows a data analysis method where he creates a logical model based on the assumptions of an adversary's proposed actions, mechanisms, indicators, and develops accurate predictions. He further takes into consideration the important factors such as methods, vulnerabilities, targets, and so on. Which of the following data analysis methods is used by Sam to extract useful intelligence?",
+                options: ["Analogy analysis", "Critical path analysis", "Linchpin analysis", "Opportunity analysis"],
+                correct: 2
+            },
+            {
+                question: "An autonomous robot was deployed to navigate and learn about the environment. Through this process, the robot refines its actions based on positive or negative feedback to maximize performance. What type of machine learning will the robot employ in this scenario?",
+                options: ["Reinforcement learning", "Semi-supervised learning", "Supervised learning", "Unsupervised learning"],
+                correct: 0
+            },
+            {
+                question: "John is a lead cybersecurity analyst preparing to gather threat intelligence for client organizations. Arrange the following steps in the correct sequence, outlining the process that John would follow for threat intelligence collection: 1. Structuring/normalization 2. Sharing information 3. Data collection 4. Storing and visualizing data",
+                options: ["3-1-4-2", "1-2-3-4", "2-1-4-3", "4-3-2-1"],
+                correct: 0
+            },
+            {
+                question: "Which of the following types of threat attribution deals with the identification of a country sponsoring a well-planned and executed intrusion or attack over its target?",
+                options: ["Campaign attribution", "Intrusion-set attribution", "True attribution", "Nation-state attribution"],
+                correct: 3
+            },
+            {
+                question: "Henry, working as a threat analyst in an organization named Myles Tech, wants to share gathered intelligence. He wants to share the intelligence with a broad range of communities where the sensitivity of information is less. Which of the following tiers of the sharing model must be employed by Henry?",
+                options: ["Multitier", "Private tier", "Targeted tier", "Public tier"],
+                correct: 3
+            },
+            {
+                question: "Jack is a professional hacker who wants to perform remote exploitation on the target organization. He established a two-way communication channel between the victim's system and his own. He used encryption techniques to hide the presence of a communication channel and further applied privilege escalation techniques to exploit the system. What phase of the cyber kill chain methodology is Jack currently in?",
+                options: ["Delivery", "Reconnaissance", "Command and control", "Weaponization"],
+                correct: 2
+            },
+            {
+                question: "The cybersecurity team seeks to enhance its threat hunting capabilities in a large enterprise by searching systematically and proactively for adversaries within their networks. What type of approaches are they most likely to adopt, involving predefined processes, methodologies, and frameworks for their investigation?",
+                options: ["Entity-driven threat hunting", "Structured threat hunting", "Situational threat hunting", "Unstructured threat hunting"],
+                correct: 1
+            },
+            {
+                question: "John, a threat intelligence analyst in CyberTech Company, was asked to obtain information to gain greater insight into the current cyber risks. To gather such information, John needs to find answers to the following questions: - Why might the organization be attacked? - How might the organization be attacked? - Who might be the intruders? Identify the type of security testing John is going to perform.",
+                options: ["White box testing", "Performance testing", "Black box testing", "Intelligence-led security testing"],
+                correct: 3
+            },
+            {
+                question: "Tech Knights Inc., a small-scale company, has decided to share the intelligence information with other organizations using a nonprofit association that provides a secure place to accumulate and share information about cyber threats in the industry, and it also provides an extended service for protecting the organizational network. Which of the following types of sharing organizations should Tech Knights Inc. use to share intelligence?",
+                options: ["Informal contacts", "Commercial vendors", "Information sharing and analysis centers (ISACs)", "Trading partners"],
+                correct: 2
+            },
+            {
+                question: "What term describes the trust establishment process wherein the first organization provides evidence presented to the second organization, and the level of trust is contingent upon the quality of evidence provided by the initiating organization?",
+                options: ["Direct historical trust", "Mediated trust", "Validated trust", "Mandated trust"],
+                correct: 2
+            },
+            {
+                question: "A company, TechSoft Solutions, implemented a threat intelligence program and began developing capabilities obtained in the previous levels and created an organized team approach for strategic analysis. The company also established necessary intelligence processes and workflows to extract valuable intelligence. Identify the threat intelligence maturity level at which the company stands.",
+                options: ["Level 3: CTI program in place", "Level 2: Increasing CTI capabilities", "Level 4: Well-defined CTI program", "Level 1: Preparing for CTI"],
+                correct: 0
+            },
+            {
+                question: "You are a cybersecurity analyst working at a financial institution. An unusual pattern of financial transactions was detected, suggesting potential fraud or money laundering. What specific type of threat intelligence would you rely on to analyze these financial activities and identify potential risks?",
+                options: ["FININT", "CHIS", "TECHINT", "SOCINT"],
+                correct: 0
+            },
+            {
+                question: "You are the leading cybersecurity analyst at a financial institution. An anomaly is detected in transaction patterns, suggesting a potential security threat. To proactively investigate and mitigate the risk, arrange the following steps in the correct sequence as part of the threat hunting process: 1. Investigation 2. Collect and process data 3. Response 4. Hypothesis 5. Trigger",
+                options: ["5→3→1→4→2", "3→2→5→1→4", "4→1→3→5→2", "4→2→5→1→3"],
+                correct: 3
+            },
+            {
+                question: "Tracy works as a CISO in a large multinational company. She consumes threat intelligence to understand the changing trends of cybersecurity. She requires intelligence to understand the current trends and make appropriate decisions regarding new technologies, security budget, and improvement of processes. This intelligence helps her in minimizing business risks and protecting the new technological initiatives. Identify the type of threat intelligence consumer Tracy is.",
+                options: ["Operational users", "Strategic users", "Tactical users", "Technical users"],
+                correct: 1
+            },
+            {
+                question: "A consortium was established in a collaborative effort to strengthen the cybersecurity posture of organizations within an industry sector. The participating entities decided to adopt an exchange architecture in which all threat data is collected, analyzed, and disseminated through a central hub. What type of threat intelligence exchange architecture was implemented in this scenario?",
+                options: ["Hybrid exchange architecture", "Federated exchange architecture", "Decentralized exchange architecture", "Centralized exchange architecture"],
+                correct: 3
+            },
+            {
+                question: "Which component of risk management involves evaluating and ranking risks based on their potential impact, allowing organizations to focus resources on addressing the most critical threats?",
+                options: ["Risk identification", "Risk assessment", "Risk prioritization", "Risk mitigation"],
+                correct: 2
+            },
+            {
+                question: "A threat analyst wants to incorporate a requirement in the threat knowledge repository that allows authorized personnel to modify or delete past or irrelevant threat data. Which of the following requirements must he include in the threat knowledge repository to achieve this goal?",
+                options: ["Evaluating performance", "Data management", "Protection ranking", "Searchable functionality"],
+                correct: 1
+            },
+            {
+                question: "Two cybersecurity teams from different organizations joined forces to combat a rapidly evolving malware campaign targeting their industry. They exchange real-time information about the attacks, compromised systems, and immediate defensive actions. What type of threat intelligence sharing characterizes this collaboration?",
+                options: ["Sharing strategic threat intelligence", "Sharing tactical threat intelligence", "Sharing technical threat intelligence", "Sharing operational threat intelligence"],
+                correct: 3
+            },
+            {
+                question: "Flora, a threat intelligence analyst at PanTech Cyber Solutions, is working on a threat intelligence project. She is trying to collect the company's crucial information through online job sites. Which of the following information will Flora obtain through job sites?",
+                options: ["Employee details and social security numbers", "Open ports and services", "Top-level domains and subdomains of the company", "Hardware and software information, network-related information, and company infrastructure"],
+                correct: 3
+            },
+            {
+                question: "In which of the following forms of bulk data collection are large amounts of data first collected from various sources in multiple formats and then processed to achieve threat intelligence?",
+                options: ["Hybrid form", "Production form", "Unstructured form", "Structured form"],
+                correct: 2
+            },
+            {
+                question: "Organizations must choose the right threat intelligence platform to assess and leverage intelligence, monitor multiple enforcement points, manage intelligence feeds, and select appropriate security measures for assets. Which of the following key factors ensures that the TI platform offers a structured way to conduct investigations on attacks by processing the threat intelligence and utilizing the internal threat data to automate the detection process?",
+                options: ["Open", "Workflow", "Search", "Scoring"],
+                correct: 1
+            }
+        ];
+
+        // 測驗狀態
+        let currentQuestionIndex = 0;
+        let correctAnswers = 0;
+        let totalAnswered = 0;
+        let selectedAnswer = null;
+        let isAnswered = false;
+        let shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+
+        // DOM 元素
+        const questionNumberEl = document.getElementById('question-number');
+        const questionTextEl = document.getElementById('question-text');
+        const optionsContainerEl = document.getElementById('options-container');
+        const feedbackEl = document.getElementById('feedback');
+        const submitBtn = document.getElementById('submit-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const currentQuestionEl = document.getElementById('current-question');
+        const correctCountEl = document.getElementById('correct-count');
+        const accuracyEl = document.getElementById('accuracy');
+        const progressFillEl = document.getElementById('progress-fill');
+        const quizContentEl = document.getElementById('quiz-content');
+        const quizCompleteEl = document.getElementById('quiz-complete');
+        const finalScoreEl = document.getElementById('final-score');
+        const performanceMessageEl = document.getElementById('performance-message');
+        const restartFinalBtn = document.getElementById('restart-final-btn');
+
+        // 初始化測驗
+        function initQuiz() {
+            currentQuestionIndex = 0;
+            correctAnswers = 0;
+            totalAnswered = 0;
+            selectedAnswer = null;
+            isAnswered = false;
+            shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
+            
+            quizContentEl.style.display = 'block';
+            quizCompleteEl.style.display = 'none';
+            
+            loadQuestion();
+            updateStats();
+            updateProgress();
+        }
+
+        // 載入問題
+        function loadQuestion() {
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            
+            questionNumberEl.textContent = `Question ${currentQuestionIndex + 1}`;
+            questionTextEl.textContent = currentQuestion.question;
+            
+            // 清空選項容器
+            optionsContainerEl.innerHTML = '';
+            
+            // 創建選項
+            currentQuestion.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'option';
+                optionEl.innerHTML = `
+                    <span class="option-label">${String.fromCharCode(65 + index)}.</span>
+                    ${option}
+                `;
+                
+                optionEl.addEventListener('click', () => selectOption(index, optionEl));
+                optionsContainerEl.appendChild(optionEl);
+            });
+            
+            // 重置狀態
+            selectedAnswer = null;
+            isAnswered = false;
+            feedbackEl.style.display = 'none';
+            submitBtn.style.display = 'inline-block';
+            submitBtn.disabled = true;
+            nextBtn.style.display = 'none';
+            restartBtn.style.display = 'none';
+        }
+
+        // 選擇選項
+        function selectOption(index, optionEl) {
+            if (isAnswered) return;
+            
+            // 移除之前的選擇
+            document.querySelectorAll('.option').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // 選擇當前選項
+            optionEl.classList.add('selected');
+            selectedAnswer = index;
+            submitBtn.disabled = false;
+        }
+
+        // 提交答案
+        function submitAnswer() {
+            if (selectedAnswer === null || isAnswered) return;
+            
+            isAnswered = true;
+            totalAnswered++;
+            
+            const currentQuestion = shuffledQuestions[currentQuestionIndex];
+            const options = document.querySelectorAll('.option');
+            
+            // 標記正確和錯誤答案
+            options.forEach((option, index) => {
+                if (index === currentQuestion.correct) {
+                    option.classList.add('correct');
+                } else if (index === selectedAnswer && index !== currentQuestion.correct) {
+                    option.classList.add('incorrect');
+                }
+            });
+            
+            // 顯示反饋
+            const isCorrect = selectedAnswer === currentQuestion.correct;
+            if (isCorrect) {
+                correctAnswers++;
+                feedbackEl.className = 'feedback correct';
+                feedbackEl.textContent = '✅ 正確！答得很好！';
+            } else {
+                feedbackEl.className = 'feedback incorrect';
+                feedbackEl.textContent = `❌ 錯誤！正確答案是：${String.fromCharCode(65 + currentQuestion.correct)}. ${currentQuestion.options[currentQuestion.correct]}`;
+            }
+            
+            feedbackEl.style.display = 'block';
+            submitBtn.style.display = 'none';
+            
+            // 更新統計
+            updateStats();
+            
+            // 顯示控制按鈕
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                nextBtn.style.display = 'inline-block';
+            } else {
+                restartBtn.style.display = 'inline-block';
+                setTimeout(showFinalResults, 2000);
+            }
+        }
+
+        // 下一題
+        function nextQuestion() {
+            if (currentQuestionIndex < shuffledQuestions.length - 1) {
+                currentQuestionIndex++;
+                loadQuestion();
+                updateStats();
+                updateProgress();
+            }
+        }
+
+        // 更新統計
+        function updateStats() {
+            currentQuestionEl.textContent = currentQuestionIndex + 1;
+            correctCountEl.textContent = correctAnswers;
+            
+            const accuracy = totalAnswered > 0 ? Math.round((correctAnswers / totalAnswered) * 100) : 0;
+            accuracyEl.textContent = accuracy + '%';
+        }
+
+        // 更新進度條
+        function updateProgress() {
+            const progress = ((currentQuestionIndex + 1) / shuffledQuestions.length) * 100;
+            progressFillEl.style.width = progress + '%';
+        }
+
+        // 顯示最終結果
+        function showFinalResults() {
+            quizContentEl.style.display = 'none';
+            quizCompleteEl.style.display = 'block';
+            
+            const finalScore = Math.round((correctAnswers / totalAnswered) * 100);
+            finalScoreEl.textContent = finalScore + '%';
+            
+            let message = '';
+            if (finalScore >= 90) {
+                message = '🏆 優秀！您對威脅情報分析有深入的理解！';
+            } else if (finalScore >= 80) {
+                message = '👍 很好！您掌握了大部分威脅情報分析知識！';
+            } else if (finalScore >= 70) {
+                message = '💪 不錯！繼續學習可以進一步提升！';
+            } else if (finalScore >= 60) {
+                message = '📚 合格！建議加強學習威脅情報分析相關知識！';
+            } else {
+                message = '📖 需要更多練習！建議系統性學習威脅情報分析！';
+            }
+            
+            performanceMessageEl.textContent = message;
+        }
+
+        // 重新開始測驗
+        function restartQuiz() {
+            initQuiz();
+        }
+
+        // 事件監聽器
+        submitBtn.addEventListener('click', submitAnswer);
+        nextBtn.addEventListener('click', nextQuestion);
+        restartBtn.addEventListener('click', restartQuiz);
+        restartFinalBtn.addEventListener('click', restartQuiz);
+
+        // 鍵盤快捷鍵
+        document.addEventListener('keydown', (e) => {
+            if (isAnswered) return;
+            
+            // A, B, C, D 鍵選擇選項
+            if (e.key >= 'A' && e.key <= 'D') {
+                const index = e.key.charCodeAt(0) - 65;
+                const options = document.querySelectorAll('.option');
+                if (options[index]) {
+                    selectOption(index, options[index]);
+                }
+            }
+            // 小寫也支援
+            else if (e.key >= 'a' && e.key <= 'd') {
+                const index = e.key.charCodeAt(0) - 97;
+                const options = document.querySelectorAll('.option');
+                if (options[index]) {
+                    selectOption(index, options[index]);
+                }
+            }
+            // Enter 鍵提交答案
+            else if (e.key === 'Enter') {
+                if (!submitBtn.disabled && submitBtn.style.display !== 'none') {
+                    submitAnswer();
+                } else if (nextBtn.style.display !== 'none') {
+                    nextQuestion();
+                }
+            }
+        });
+
+        // 初始化測驗
+        initQuiz();
+    </script>
+</body>
+</html>
